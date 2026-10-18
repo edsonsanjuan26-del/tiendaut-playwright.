@@ -1,0 +1,123 @@
+
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Catálogo | TiendaUT</title>
+</head>
+<body>
+  <header>
+    <h1>Catálogo</h1>
+  </header>
+
+  <main>
+    <section aria-label="Carrito de compras">
+      <p>
+        Carrito:
+        <span data-testid="contador-carrito">0</span>
+        productos
+      </p>
+      <button id="vaciar" type="button">Vaciar carrito</button>
+    </section>
+
+    <section aria-label="Productos">
+      <label for="buscar">Buscar producto</label>
+      <input
+        type="search"
+        placeholder="Buscar producto"
+        id="buscar"
+      >
+
+      <p id="mensaje-error" role="alert" hidden>
+        No pudimos cargar los productos
+      </p>
+
+      <ul id="lista">
+        <li>Cargando...</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    let carrito = 0;
+    let productos = [];
+
+    const lista = document.getElementById('lista');
+    const contador = document.querySelector(
+      '[data-testid="contador-carrito"]'
+    );
+    const buscador = document.getElementById('buscar');
+    const botonVaciar = document.getElementById('vaciar');
+    const mensajeError = document.getElementById('mensaje-error');
+
+    function pintar(filtro = '') {
+      lista.replaceChildren();
+
+      const termino = filtro.trim().toLowerCase();
+
+      const filtrados = productos.filter(producto =>
+        producto.nombre.toLowerCase().includes(termino)
+      );
+
+      filtrados.forEach(producto => {
+        const li = document.createElement('li');
+        li.dataset.testid = 'producto';
+
+        const nombre = document.createElement('h2');
+        nombre.textContent = producto.nombre;
+
+        const precio = document.createElement('span');
+        precio.textContent = `$${producto.precio}`;
+
+        const botonAgregar = document.createElement('button');
+        botonAgregar.type = 'button';
+        botonAgregar.textContent = 'Agregar al carrito';
+
+        botonAgregar.addEventListener('click', () => {
+          carrito++;
+          contador.textContent = carrito;
+        });
+
+        li.append(nombre, precio, botonAgregar);
+        lista.appendChild(li);
+      });
+    }
+
+    async function cargarProductos() {
+      try {
+        const respuesta = await fetch('/api/productos');
+
+        if (!respuesta.ok) {
+          throw new Error('No se pudieron cargar los productos');
+        }
+
+        const datos = await respuesta.json();
+
+        if (!Array.isArray(datos)) {
+          throw new Error('La respuesta de productos no es válida');
+        }
+
+        productos = datos;
+        mensajeError.hidden = true;
+        pintar(buscador.value);
+      } catch (error) {
+        productos = [];
+        lista.replaceChildren();
+        mensajeError.hidden = false;
+      }
+    }
+
+    buscador.addEventListener('input', () => {
+      pintar(buscador.value);
+    });
+
+    botonVaciar.addEventListener('click', () => {
+      carrito = 0;
+      contador.textContent = '0';
+    });
+
+    cargarProductos();
+  </script>
+</body>
+</html>
