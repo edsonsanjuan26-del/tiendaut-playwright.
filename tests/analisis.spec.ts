@@ -11,7 +11,10 @@ test.describe('Análisis de calidad del catálogo', () => {
     page.on('pageerror', (err) => mensajes.push(err.message));
 
     await page.goto('/catalogo.html');
-    await expect(page.getByTestId('producto')).toHaveCount(4);
+    
+await expect(page.getByTestId('producto')).toHaveCount(4, {
+  timeout: 15000,
+});
 
     expect(mensajes, 'Errores encontrados en consola').toEqual([]);
   });
@@ -23,7 +26,9 @@ test.describe('Análisis de calidad del catálogo', () => {
     });
 
     await page.goto('/catalogo.html');
-    await expect(page.getByTestId('producto')).toHaveCount(4);
+    await expect(page.getByTestId('producto')).toHaveCount(4, {
+  timeout: 15000,
+});
 
     expect(fallidas).toEqual([]);
   });

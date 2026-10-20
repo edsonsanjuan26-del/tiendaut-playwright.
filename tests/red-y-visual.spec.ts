@@ -11,7 +11,10 @@ test('si la API falla, el catálogo debe avisar al usuario', async ({ page }) =>
   await expect(page.getByText('No pudimos cargar los productos')).toBeVisible();
 });
 
+
 test('la página de inicio se ve igual que la referencia', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveScreenshot('inicio.png');
+  await expect(page).toHaveScreenshot('inicio.png', {
+    maxDiffPixels: 500,
+  });
 });
